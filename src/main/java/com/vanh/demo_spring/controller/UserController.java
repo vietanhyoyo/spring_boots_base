@@ -17,6 +17,8 @@ import com.vanh.demo_spring.dto.request.UserUpdateRequest;
 import com.vanh.demo_spring.entity.User;
 import com.vanh.demo_spring.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -24,7 +26,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    User createUser(@RequestBody UserCreationRequest request) {
+    User createUser(@RequestBody @Valid UserCreationRequest request) {
         return userService.createUser(request);
     }
 
