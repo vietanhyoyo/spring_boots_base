@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.vanh.demo_spring.dto.request.UserCreationRequest;
 import com.vanh.demo_spring.dto.request.UserUpdateRequest;
 import com.vanh.demo_spring.entity.User;
+import com.vanh.demo_spring.exception.AppException;
+import com.vanh.demo_spring.exception.ErrorCode;
 import com.vanh.demo_spring.repository.UserRepository;
 
 @Service
@@ -19,7 +21,7 @@ public class UserService {
         User user = new User();
 
         if (userRepository.existsByUsername(request.getUsername()))
-            throw new RuntimeException("User existed.");
+            throw new AppException(ErrorCode.USER_EXISTED);
         
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
