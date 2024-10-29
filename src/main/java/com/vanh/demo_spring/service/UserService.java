@@ -1,8 +1,8 @@
 package com.vanh.demo_spring.service;
 
+import java.util.HashSet;
 import java.util.List;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +10,7 @@ import com.vanh.demo_spring.dto.request.UserCreationRequest;
 import com.vanh.demo_spring.dto.request.UserUpdateRequest;
 import com.vanh.demo_spring.dto.response.UserResponse;
 import com.vanh.demo_spring.entity.User;
+import com.vanh.demo_spring.enums.Role;
 import com.vanh.demo_spring.exception.AppException;
 import com.vanh.demo_spring.exception.ErrorCode;
 import com.vanh.demo_spring.mapper.UserMapper;
@@ -26,20 +27,25 @@ public class UserService {
 
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     public User createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
         User user = userMapper.toUser(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+
+        user.setRoles(roles);
 
         return userRepository.save(user);
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getUsers() {
+        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     public UserResponse getUser(String id) {
