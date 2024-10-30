@@ -17,7 +17,6 @@ import com.vanh.demo_spring.dto.request.UserCreationRequest;
 import com.vanh.demo_spring.dto.request.UserUpdateRequest;
 import com.vanh.demo_spring.dto.response.UserResponse;
 import com.vanh.demo_spring.entity.User;
-import com.vanh.demo_spring.repository.UserRepository;
 import com.vanh.demo_spring.service.UserService;
 
 import jakarta.validation.Valid;
@@ -67,5 +66,13 @@ public class UserController {
     String deleteUser(@PathVariable("userId") String userId) {
         userService.deleteUser(userId);
         return "User has been deleted";
+    }
+
+    @GetMapping("/myInfo")
+    ApiResponse<UserResponse> getUser() {
+
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getMyInfo())
+                .build();
     }
 }
