@@ -1,6 +1,7 @@
 package com.vanh.demo_spring.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,7 +10,7 @@ import com.vanh.demo_spring.dto.request.ApiResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    
+
     @SuppressWarnings("rawtypes")
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
@@ -30,7 +31,19 @@ public class GlobalExceptionHandler {
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNANTHORIZED;
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(
+                ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
 
     @SuppressWarnings("rawtypes")
@@ -43,7 +56,7 @@ public class GlobalExceptionHandler {
         try {
             errorCode = ErrorCode.valueOf(enumKey);
         } catch (IllegalArgumentException e) {
-            
+
         }
 
         ApiResponse apiResponse = new ApiResponse();
