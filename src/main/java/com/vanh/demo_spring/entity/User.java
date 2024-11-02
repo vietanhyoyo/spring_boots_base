@@ -2,10 +2,8 @@ package com.vanh.demo_spring.entity;
 
 import java.time.LocalDate;
 import java.util.Set;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,5 +28,7 @@ public class User {
     String firstName;
     String lastName;
     LocalDate dob;
-    Set<String> roles;
+
+    @ManyToMany
+    Set<Role> roles;
 }
