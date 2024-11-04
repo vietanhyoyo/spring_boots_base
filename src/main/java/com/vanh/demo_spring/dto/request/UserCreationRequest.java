@@ -2,6 +2,8 @@ package com.vanh.demo_spring.dto.request;
 
 import java.time.LocalDate;
 
+import com.vanh.demo_spring.exception.ErrorCode;
+import com.vanh.demo_spring.validator.DobConstraint;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,5 +27,7 @@ public class UserCreationRequest {
 
     String firstName;
     String lastName;
+
+    @DobConstraint(min = 18, message = "INVALID_DOB")
     LocalDate dob;
 }

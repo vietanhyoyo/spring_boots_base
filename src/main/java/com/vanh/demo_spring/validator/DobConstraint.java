@@ -11,7 +11,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ FIELD })
 @Retention(RUNTIME)
-@Constraint(validatedBy = {})
+@Constraint(validatedBy = { DobValidator.class })
 public @interface DobConstraint {
     String message() default "Invalid date of birth";
 
