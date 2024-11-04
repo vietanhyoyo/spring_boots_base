@@ -3,6 +3,7 @@ package com.vanh.demo_spring.service;
 import java.util.HashSet;
 import java.util.List;
 
+import com.vanh.demo_spring.repository.RoleRepository;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +34,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public User createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
@@ -45,7 +47,6 @@ public class UserService {
         roles.add(Role.USER.name());
 
         // user.setRoles(roles);
-
         return userRepository.save(user);
     }
 
@@ -63,9 +64,13 @@ public class UserService {
     }
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateUser(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
