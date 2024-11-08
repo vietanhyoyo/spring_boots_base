@@ -8,6 +8,7 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 import com.vanh.demo_spring.dto.request.LogoutRequest;
+import com.vanh.demo_spring.dto.request.RefreshRequest;
 import com.vanh.demo_spring.entity.InvalidatedToken;
 import com.vanh.demo_spring.repository.InvalidatedTokenRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -144,14 +145,38 @@ public class AuthenticationService {
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         var signToken = verifyToken(request.getToken());
 
-        String jwt = signToken.getJWTClaimsSet().getJWTID();
+        String jit = signToken.getJWTClaimsSet().getJWTID();
         Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jwt)
+                .id(jit)
                 .expiryTime(expiryTime)
                 .build();
 
         invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signJWT = verifyToken(request.getToken());
+
+        var jit = signJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var username = signJWT.getJWTClaimsSet().getSubject();
+
+        var user = userRepository.findByUsername(username).orElseThrow(
+                () -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(token).authenticated(true).build();
     }
 }
