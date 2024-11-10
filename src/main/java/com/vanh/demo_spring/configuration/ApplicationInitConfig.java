@@ -3,12 +3,12 @@ package com.vanh.demo_spring.configuration;
 import java.util.HashSet;
 
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.vanh.demo_spring.entity.User;
-import com.vanh.demo_spring.enums.Role;
 import com.vanh.demo_spring.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -25,6 +25,10 @@ public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
 
     @Bean
+    @ConditionalOnProperty(prefix = "spring",
+            value = "datasource.driverClassName",
+            havingValue = "com.mysql.cj.jdbc.Driver"
+    )
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
