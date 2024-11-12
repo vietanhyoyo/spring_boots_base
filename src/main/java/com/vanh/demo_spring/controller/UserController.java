@@ -2,6 +2,8 @@ package com.vanh.demo_spring.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +18,8 @@ import com.vanh.demo_spring.dto.request.ApiResponse;
 import com.vanh.demo_spring.dto.request.UserCreationRequest;
 import com.vanh.demo_spring.dto.request.UserUpdateRequest;
 import com.vanh.demo_spring.dto.response.UserResponse;
-import com.vanh.demo_spring.entity.User;
 import com.vanh.demo_spring.service.UserService;
 
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,7 +34,7 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request){
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         log.info("Controller: create User");
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))

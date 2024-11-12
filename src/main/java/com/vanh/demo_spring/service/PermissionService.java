@@ -1,17 +1,19 @@
 package com.vanh.demo_spring.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.vanh.demo_spring.dto.request.PermissionRequest;
 import com.vanh.demo_spring.dto.response.PermissionResponse;
+import com.vanh.demo_spring.entity.Permission;
 import com.vanh.demo_spring.mapper.PermissionMapper;
 import com.vanh.demo_spring.repository.PermissionRepository;
-import com.vanh.demo_spring.entity.Permission;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class PermissionService {
     PermissionRepository permissionRepository;
     PermissionMapper permissionMapper;
 
-    public PermissionResponse create(PermissionRequest request){
+    public PermissionResponse create(PermissionRequest request) {
         Permission permission = permissionMapper.toPermission(request);
         permission = permissionRepository.save(permission);
         return permissionMapper.toPermissionResponse(permission);

@@ -1,7 +1,5 @@
 package com.vanh.demo_spring.configuration;
 
-import java.util.HashSet;
-
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -25,10 +23,10 @@ public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
 
     @Bean
-    @ConditionalOnProperty(prefix = "spring",
+    @ConditionalOnProperty(
+            prefix = "spring",
             value = "datasource.driverClassName",
-            havingValue = "com.mysql.cj.jdbc.Driver"
-    )
+            havingValue = "com.mysql.cj.jdbc.Driver")
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
@@ -40,7 +38,6 @@ public class ApplicationInitConfig {
                 userRepository.save(user);
                 log.warn("admin user has been created with default password: admin, please change it ");
             }
-
         };
     }
 }

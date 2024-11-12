@@ -1,6 +1,10 @@
 package com.vanh.demo_spring.exception;
 
+import java.util.Map;
+import java.util.Objects;
+
 import jakarta.validation.ConstraintViolation;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,9 +12,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.vanh.demo_spring.dto.request.ApiResponse;
-
-import java.util.Map;
-import java.util.Objects;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -45,8 +46,8 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
-        return ResponseEntity.status(errorCode.getStatusCode()).body(
-                ApiResponse.builder()
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build());
@@ -63,7 +64,8 @@ public class GlobalExceptionHandler {
         try {
             errorCode = ErrorCode.valueOf(enumKey);
 
-            var constraintViolation = exception.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
+            var constraintViolation =
+                    exception.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
 
         } catch (IllegalArgumentException e) {
@@ -73,9 +75,10 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(Objects.nonNull(attributes) ?
-                mapAttribute(errorCode.getMessage(), attributes) :
-                errorCode.getMessage());
+        apiResponse.setMessage(
+                Objects.nonNull(attributes)
+                        ? mapAttribute(errorCode.getMessage(), attributes)
+                        : errorCode.getMessage());
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -85,5 +88,4 @@ public class GlobalExceptionHandler {
 
         return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
     }
-
 }

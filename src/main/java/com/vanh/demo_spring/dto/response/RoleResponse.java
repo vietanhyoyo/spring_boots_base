@@ -1,10 +1,11 @@
 package com.vanh.demo_spring.dto.response;
 
+import java.util.Set;
+
 import com.vanh.demo_spring.entity.Permission;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Data
 @NoArgsConstructor

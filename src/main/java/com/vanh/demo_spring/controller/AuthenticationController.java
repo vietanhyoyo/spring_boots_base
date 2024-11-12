@@ -2,13 +2,13 @@ package com.vanh.demo_spring.controller;
 
 import java.text.ParseException;
 
-import com.vanh.demo_spring.dto.request.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nimbusds.jose.JOSEException;
+import com.vanh.demo_spring.dto.request.*;
 import com.vanh.demo_spring.dto.response.AuthenticationResponse;
 import com.vanh.demo_spring.dto.response.IntrospectResponse;
 import com.vanh.demo_spring.service.AuthenticationService;
@@ -27,9 +27,7 @@ public class AuthenticationController {
     @PostMapping("/token")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
-        return ApiResponse.<AuthenticationResponse>builder()
-                .result(result)
-                .build();
+        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
 
     @PostMapping("/introspect")
@@ -46,11 +44,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+    ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request)
+            throws ParseException, JOSEException {
         var result = authenticationService.refreshToken(request);
-        return ApiResponse.<AuthenticationResponse>builder()
-                .result(result)
-                .build();
+        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
-
 }

@@ -12,7 +12,9 @@ import com.vanh.demo_spring.entity.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     User toUser(UserCreationRequest request);
+
     UserResponse toUserResponse(User user);
+
     @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 }

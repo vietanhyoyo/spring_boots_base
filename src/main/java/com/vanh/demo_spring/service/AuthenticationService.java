@@ -7,11 +7,6 @@ import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import com.vanh.demo_spring.dto.request.LogoutRequest;
-import com.vanh.demo_spring.dto.request.RefreshRequest;
-import com.vanh.demo_spring.entity.InvalidatedToken;
-import com.vanh.demo_spring.repository.InvalidatedTokenRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,17 +25,22 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.vanh.demo_spring.dto.request.AuthenticationRequest;
 import com.vanh.demo_spring.dto.request.IntrospectRequest;
+import com.vanh.demo_spring.dto.request.LogoutRequest;
+import com.vanh.demo_spring.dto.request.RefreshRequest;
 import com.vanh.demo_spring.dto.response.AuthenticationResponse;
 import com.vanh.demo_spring.dto.response.IntrospectResponse;
+import com.vanh.demo_spring.entity.InvalidatedToken;
 import com.vanh.demo_spring.entity.User;
 import com.vanh.demo_spring.exception.AppException;
 import com.vanh.demo_spring.exception.ErrorCode;
+import com.vanh.demo_spring.repository.InvalidatedTokenRepository;
 import com.vanh.demo_spring.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -63,21 +63,19 @@ public class AuthenticationService {
     protected long REFRESHABLE_DURATION;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        var user = userRepository.findByUsername(request.getUsername())
+        var user = userRepository
+                .findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         var token = generateToken(user);
 
-        return AuthenticationResponse.builder()
-                .token(token).authenticated(true).build();
-
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
@@ -90,9 +88,7 @@ public class AuthenticationService {
             isValid = false;
         }
 
-        return IntrospectResponse.builder()
-                .valid(isValid)
-                .build();
+        return IntrospectResponse.builder().valid(isValid).build();
     }
 
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
@@ -101,8 +97,12 @@ public class AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(token);
 
         Date expiryTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                ? new Date(signedJWT
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);
@@ -124,7 +124,8 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("vanh.com")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
@@ -162,10 +163,8 @@ public class AuthenticationService {
             String jit = signToken.getJWTClaimsSet().getJWTID();
             Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
-            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                    .id(jit)
-                    .expiryTime(expiryTime)
-                    .build();
+            InvalidatedToken invalidatedToken =
+                    InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
 
             invalidatedTokenRepository.save(invalidatedToken);
         } catch (AppException e) {
@@ -179,21 +178,18 @@ public class AuthenticationService {
         var jit = signJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signJWT.getJWTClaimsSet().getExpirationTime();
 
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jit)
-                .expiryTime(expiryTime)
-                .build();
+        InvalidatedToken invalidatedToken =
+                InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
 
         invalidatedTokenRepository.save(invalidatedToken);
 
         var username = signJWT.getJWTClaimsSet().getSubject();
 
-        var user = userRepository.findByUsername(username).orElseThrow(
-                () -> new AppException(ErrorCode.UNAUTHENTICATED));
+        var user =
+                userRepository.findByUsername(username).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         var token = generateToken(user);
 
-        return AuthenticationResponse.builder()
-                .token(token).authenticated(true).build();
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 }

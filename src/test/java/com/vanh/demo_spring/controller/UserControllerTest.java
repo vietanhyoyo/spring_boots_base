@@ -1,10 +1,7 @@
 package com.vanh.demo_spring.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.vanh.demo_spring.dto.request.UserCreationRequest;
-import com.vanh.demo_spring.dto.response.UserResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,12 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vanh.demo_spring.dto.request.UserCreationRequest;
+import com.vanh.demo_spring.dto.response.UserResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SpringBootTest
@@ -40,7 +42,6 @@ public class UserControllerTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
     }
 
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -51,8 +52,7 @@ public class UserControllerTest {
     @BeforeEach
     void intiData() {
         dob = LocalDate.of(1990, 1, 1);
-        request = UserCreationRequest
-                .builder()
+        request = UserCreationRequest.builder()
                 .username("john")
                 .firstName("John")
                 .lastName("Doe")
@@ -77,26 +77,20 @@ public class UserControllerTest {
         String content = objectMapper.writeValueAsString(request);
 
         // WHEN, THEN
-        var response = mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
+        var response = mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(content))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("code")
-                        .value(0))
-                .andExpect(MockMvcResultMatchers.jsonPath("result.username")
-                        .value("john"))
-                .andExpect(MockMvcResultMatchers.jsonPath("result.firstName")
-                        .value("John"))
-                .andExpect(MockMvcResultMatchers.jsonPath("result.lastName")
-                        .value("Doe")
-                );
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(0))
+                .andExpect(MockMvcResultMatchers.jsonPath("result.username").value("john"))
+                .andExpect(MockMvcResultMatchers.jsonPath("result.firstName").value("John"))
+                .andExpect(MockMvcResultMatchers.jsonPath("result.lastName").value("Doe"));
 
         log.info("Result: {}", response.andReturn().getResponse().getContentAsString());
     }
 
     @Test
-        //
+    //
     void createUser_usernameInvalid_fail() throws Exception {
         // GIVEN
         request.setUsername("joh");
@@ -105,15 +99,11 @@ public class UserControllerTest {
         String content = objectMapper.writeValueAsString(request);
 
         // WHEN, THEN
-        mockMvc.perform(MockMvcRequestBuilders
-                        .post("/users")
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(content))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("code")
-                        .value(1003))
-                .andExpect(MockMvcResultMatchers.jsonPath("message")
-                        .value("Username must be at least 4 characters")
-                );
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1003))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Username must be at least 4 characters"));
     }
 }

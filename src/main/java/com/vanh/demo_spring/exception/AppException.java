@@ -1,7 +1,7 @@
 package com.vanh.demo_spring.exception;
 
 public class AppException extends RuntimeException {
-    
+
     private ErrorCode errorCode;
 
     public ErrorCode getErrorCode() {
