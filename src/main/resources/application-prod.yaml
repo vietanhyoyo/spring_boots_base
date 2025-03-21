@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: "jdbc:mysql://prod-db-server:3306/identity_service"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: prod_user
+    password: secure_password_123
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+jwt:
+  signerKey: Prod_Secure_SignerKey_1234567890abcdef
+  valid-duration: 1800
+  refreshable-duration: 604800
+
+logging:
+  level:
+    org.springframework: INFO
