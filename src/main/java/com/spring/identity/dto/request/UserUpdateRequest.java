@@ -3,6 +3,8 @@ package com.spring.identity.dto.request;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.validation.constraints.Email;
+
 import com.spring.identity.validator.DobConstraint;
 
 import lombok.AccessLevel;
@@ -18,6 +20,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequest {
+    @Email(message = "EMAIL_INVALID")
+    String email;
+
     String password;
     String firstName;
     String lastName;

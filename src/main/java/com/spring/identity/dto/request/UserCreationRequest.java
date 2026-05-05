@@ -2,6 +2,7 @@ package com.spring.identity.dto.request;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 import com.spring.identity.validator.DobConstraint;
@@ -20,8 +21,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
 
-    @Size(min = 4, message = "USERNAME_INVALID")
     String username;
+
+    @Email(message = "EMAIL_INVALID")
+    String email;
 
     @Size(min = 8, message = "INVALID_PASSWORD")
     String password;
