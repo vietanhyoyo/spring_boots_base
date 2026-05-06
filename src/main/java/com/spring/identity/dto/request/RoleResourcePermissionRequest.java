@@ -1,9 +1,6 @@
-package com.spring.identity.dto.response;
+package com.spring.identity.dto.request;
 
-import java.time.LocalDate;
 import java.util.Set;
-
-import com.spring.identity.entity.Role;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -13,16 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    Long id;
-    String username;
-    String email;
-    String firstName;
-    String lastName;
-    LocalDate dob;
-    Set<Role> roles;
+public class RoleResourcePermissionRequest {
+    String resource;
+    Set<String> permissions;
 }

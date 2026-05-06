@@ -9,7 +9,7 @@ import com.spring.identity.entity.Role;
 
 @Mapper(componentModel = "spring")
 public interface RoleMapper {
-    @Mapping(target = "permissions", ignore = true)
+    @Mapping(target = "resourcePermissions", ignore = true)
     Role toRole(RoleRequest role);
 
     RoleResponse toRoleResponse(Role role);

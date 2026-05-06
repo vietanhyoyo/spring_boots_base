@@ -30,7 +30,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain userCreationFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new AntPathRequestMatcher("/users", HttpMethod.POST.name()))
+        http.securityMatcher(new AntPathRequestMatcher("/register", HttpMethod.POST.name()))
                 .authorizeHttpRequests(request -> request.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable);
 

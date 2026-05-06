@@ -2,7 +2,7 @@ package com.spring.identity.dto.response;
 
 import java.util.Set;
 
-import com.spring.identity.entity.Permission;
+import com.spring.identity.entity.RoleResourcePermission;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,5 +15,5 @@ import lombok.experimental.FieldDefaults;
 public class RoleResponse {
     String name;
     String description;
-    Set<Permission> permissions;
+    Set<RoleResourcePermission> resourcePermissions;
 }

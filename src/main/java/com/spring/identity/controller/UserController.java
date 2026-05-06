@@ -56,17 +56,17 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    UserResponse getUser(@PathVariable("userId") String userId) {
+    UserResponse getUser(@PathVariable("userId") Long userId) {
         return userService.getUser(userId);
     }
 
     @PutMapping("/{userId}")
-    UserResponse updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
+    UserResponse updateUser(@PathVariable("userId") Long userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);
     }
 
     @DeleteMapping("/{userId}")
-    String deleteUser(@PathVariable("userId") String userId) {
+    String deleteUser(@PathVariable("userId") Long userId) {
         userService.deleteUser(userId);
         return "User has been deleted";
     }
