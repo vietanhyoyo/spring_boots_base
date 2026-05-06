@@ -47,7 +47,7 @@ public class UserServiceTest {
                 .build();
 
         userResponse = UserResponse.builder()
-                .id("cf0600f538b3")
+                .id(1L)
                 .username("john")
                 .firstName("John")
                 .lastName("Doe")
@@ -55,7 +55,7 @@ public class UserServiceTest {
                 .build();
 
         user = User.builder()
-                .id("cf0600f538b3")
+                .id(1L)
                 .username("john")
                 .firstName("John")
                 .lastName("Doe")

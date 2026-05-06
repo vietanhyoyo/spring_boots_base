@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spring.identity.dto.request.ApiResponse;
+import com.spring.identity.dto.request.GoogleRegisterRequest;
 import com.spring.identity.dto.request.UserCreationRequest;
 import com.spring.identity.dto.response.UserResponse;
 import com.spring.identity.service.UserService;
@@ -30,6 +31,14 @@ public class RegisterController {
         log.info("Controller: register User");
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
+                .build();
+    }
+
+    @PostMapping("/google")
+    ApiResponse<UserResponse> registerWithGoogle(@RequestBody GoogleRegisterRequest request) {
+        log.info("Controller: register User with Google");
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createGoogleUser(request))
                 .build();
     }
 }

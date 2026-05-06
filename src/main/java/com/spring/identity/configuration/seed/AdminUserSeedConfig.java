@@ -37,6 +37,7 @@ public class AdminUserSeedConfig {
 
             User user = User.builder()
                     .username("admin")
+                    .email("admin@gmail.com")
                     .password(passwordEncoder.encode("12345678"))
                     .build();
 

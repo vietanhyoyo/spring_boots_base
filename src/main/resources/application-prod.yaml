@@ -16,6 +16,9 @@ jwt:
   valid-duration: 1800
   refreshable-duration: 604800
 
+google:
+  client-id: 163231380238-bs3urggb8bfiuktcuv17bn94c60t5oq7.apps.googleusercontent.com
+
 logging:
   level:
     org.springframework: INFO

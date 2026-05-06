@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -30,7 +31,9 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain userCreationFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new AntPathRequestMatcher("/register", HttpMethod.POST.name()))
+        http.securityMatcher(new OrRequestMatcher(
+                        new AntPathRequestMatcher("/register", HttpMethod.POST.name()),
+                        new AntPathRequestMatcher("/register/**", HttpMethod.POST.name())))
                 .authorizeHttpRequests(request -> request.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable);
 
