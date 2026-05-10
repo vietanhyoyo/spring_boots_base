@@ -2,7 +2,6 @@ package com.spring.identity.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -11,52 +10,72 @@ import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.spring.identity.dto.request.UserCreationRequest;
 import com.spring.identity.dto.response.UserResponse;
 import com.spring.identity.entity.User;
 import com.spring.identity.exception.AppException;
+import com.spring.identity.mapper.UserMapper;
+import com.spring.identity.repository.RoleRepository;
 import com.spring.identity.repository.UserRepository;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-    @Autowired
-    private UserService userService;
-
-    @MockBean
+    @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserMapper userMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private GoogleTokenService googleTokenService;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @InjectMocks
+    private UserService userService;
 
     private UserCreationRequest request;
     private UserResponse userResponse;
     private User user;
-    private LocalDate dob;
 
     @BeforeEach
     void intiData() {
-        dob = LocalDate.of(1990, 1, 1);
+        LocalDate dob = LocalDate.of(1990, 1, 1);
         request = UserCreationRequest.builder()
                 .username("john")
+                .email("john@example.com")
                 .firstName("John")
                 .lastName("Doe")
                 .password("12345678")
                 .dob(dob)
                 .build();
 
-        userResponse = UserResponse.builder()
+        user = User.builder()
                 .id(1L)
                 .username("john")
+                .email("john@example.com")
                 .firstName("John")
                 .lastName("Doe")
                 .dob(dob)
                 .build();
 
-        user = User.builder()
+        userResponse = UserResponse.builder()
                 .id(1L)
                 .username("john")
+                .email("john@example.com")
                 .firstName("John")
                 .lastName("Doe")
                 .dob(dob)
@@ -66,21 +85,28 @@ public class UserServiceTest {
     @Test
     void createUser_validRequest_success() {
         // GIVEN
-        when(userRepository.existsByUsername(anyString())).thenReturn(false);
-        when(userRepository.save(any())).thenReturn(user);
+        when(userMapper.toUser(request)).thenReturn(user);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded-password");
+        when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userMapper.toUserResponse(user)).thenReturn(userResponse);
 
         // WHEN
         var response = userService.createUser(request);
-        // THEN
 
-        Assertions.assertThat(response.getId()).isEqualTo("cf0600f538b3");
+        // THEN
+        Assertions.assertThat(response.getId()).isEqualTo(1L);
         Assertions.assertThat(response.getUsername()).isEqualTo("john");
     }
 
     @Test
     void createUser_userExisted_fail() {
         // GIVEN
-        when(userRepository.existsByUsername(anyString())).thenReturn(true);
+        when(userMapper.toUser(request)).thenReturn(user);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded-password");
+        when(roleRepository.findByName("USER")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class)))
+                .thenThrow(new org.springframework.dao.DataIntegrityViolationException(""));
 
         // WHEN
         var exception = assertThrows(AppException.class, () -> userService.createUser(request));
@@ -90,29 +116,39 @@ public class UserServiceTest {
     }
 
     @Test
-    @WithMockUser(username = "john")
     void getMyInfo_valid_success() {
         // GIVEN
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        mockAuthenticationName("john@example.com");
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
+        when(userMapper.toUserResponse(user)).thenReturn(userResponse);
 
         // WHEN
         var response = userService.getMyInfo();
 
         // THEN
         Assertions.assertThat(response.getUsername()).isEqualTo("john");
-        Assertions.assertThat(response.getId()).isEqualTo("cf0600f538b3");
+        Assertions.assertThat(response.getId()).isEqualTo(1L);
     }
 
     @Test
-    @WithMockUser(username = "john")
     void getMyInfo_valid_error() {
         // GIVEN
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(null));
+        mockAuthenticationName("john@example.com");
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.empty());
 
         // WHEN
         var exception = assertThrows(AppException.class, () -> userService.getMyInfo());
 
         // THEN
         Assertions.assertThat(exception.getErrorCode().getCode()).isEqualTo(1005);
+    }
+
+    private void mockAuthenticationName(String name) {
+        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+        SecurityContext securityContext = org.mockito.Mockito.mock(SecurityContext.class);
+
+        when(authentication.getName()).thenReturn(name);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
     }
 }

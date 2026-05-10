@@ -24,6 +24,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.spring.identity.dto.request.AuthenticationRequest;
+import com.spring.identity.dto.request.GoogleAuthenticationRequest;
 import com.spring.identity.dto.request.IntrospectRequest;
 import com.spring.identity.dto.request.LogoutRequest;
 import com.spring.identity.dto.request.RefreshRequest;
@@ -49,6 +50,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
+    GoogleTokenService googleTokenService;
+    UserService userService;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -72,6 +75,24 @@ public class AuthenticationService {
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+    }
+
+    public AuthenticationResponse authenticateWithGoogle(GoogleAuthenticationRequest request) {
+        var tokenInfo = googleTokenService.verifyGoogleIdToken(request.getIdToken());
+        var user = userService.findOrCreateGoogleUser(tokenInfo);
+
+        var token = generateToken(user);
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+    }
+
+    public AuthenticationResponse authenticateWithGoogleAuthorizationCode(String code) {
+        var tokenInfo = googleTokenService.exchangeAuthorizationCode(code);
+        var user = userService.findOrCreateGoogleUser(tokenInfo);
 
         var token = generateToken(user);
 

@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GoogleRegisterRequest {
+public class GoogleAuthenticationRequest {
     @NotBlank(message = "GOOGLE_ID_TOKEN_REQUIRED")
     String idToken;
 }

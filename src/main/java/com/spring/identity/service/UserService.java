@@ -4,15 +4,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 
 import com.spring.identity.constant.PredefinedRole;
 import com.spring.identity.dto.request.GoogleRegisterRequest;
@@ -31,7 +28,6 @@ import com.spring.identity.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -43,11 +39,8 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    GoogleTokenService googleTokenService;
     private final RoleRepository roleRepository;
-
-    @NonFinal
-    @Value("${google.client-id:}")
-    String googleClientId;
 
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
@@ -68,12 +61,22 @@ public class UserService {
     }
 
     public UserResponse createGoogleUser(GoogleRegisterRequest request) {
-        GoogleTokenInfoResponse tokenInfo = verifyGoogleIdToken(request.getIdToken());
+        GoogleTokenInfoResponse tokenInfo = googleTokenService.verifyGoogleIdToken(request.getIdToken());
 
         if (userRepository.findByEmail(tokenInfo.getEmail()).isPresent()) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
+        return userMapper.toUserResponse(createUserFromGoogleTokenInfo(tokenInfo));
+    }
+
+    public User findOrCreateGoogleUser(GoogleTokenInfoResponse tokenInfo) {
+        return userRepository
+                .findByEmail(tokenInfo.getEmail())
+                .orElseGet(() -> createUserFromGoogleTokenInfo(tokenInfo));
+    }
+
+    private User createUserFromGoogleTokenInfo(GoogleTokenInfoResponse tokenInfo) {
         HashSet<Role> roles = new HashSet<>();
         roleRepository.findByName(PredefinedRole.USER_ROLE).ifPresent(roles::add);
 
@@ -87,37 +90,9 @@ public class UserService {
                 .build();
 
         try {
-            return userMapper.toUserResponse(userRepository.save(user));
+            return userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
             throw new AppException(ErrorCode.USER_EXISTED);
-        }
-    }
-
-    private GoogleTokenInfoResponse verifyGoogleIdToken(String idToken) {
-        if (!StringUtils.hasText(idToken) || !StringUtils.hasText(googleClientId)) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
-
-        try {
-            GoogleTokenInfoResponse tokenInfo = RestClient.create("https://oauth2.googleapis.com")
-                    .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/tokeninfo")
-                            .queryParam("id_token", idToken)
-                            .build())
-                    .retrieve()
-                    .body(GoogleTokenInfoResponse.class);
-
-            if (tokenInfo == null
-                    || !googleClientId.equals(tokenInfo.getAud())
-                    || !"true".equalsIgnoreCase(tokenInfo.getEmailVerified())
-                    || !StringUtils.hasText(tokenInfo.getEmail())) {
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
-
-            return tokenInfo;
-        } catch (RestClientException exception) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
     }
 

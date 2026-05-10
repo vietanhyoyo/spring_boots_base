@@ -14,21 +14,18 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GoogleTokenInfoResponse {
-    String iss;
-    String sub;
-    String aud;
-    String email;
+public class GoogleTokenExchangeResponse {
+    @JsonProperty("id_token")
+    String idToken;
 
-    @JsonProperty("email_verified")
-    String emailVerified;
+    @JsonProperty("access_token")
+    String accessToken;
 
-    @JsonProperty("given_name")
-    String givenName;
+    @JsonProperty("token_type")
+    String tokenType;
 
-    @JsonProperty("family_name")
-    String familyName;
+    @JsonProperty("expires_in")
+    Long expiresIn;
 
-    String name;
-    String picture;
+    String scope;
 }

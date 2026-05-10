@@ -15,7 +15,8 @@ public enum ErrorCode {
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "Unauthorized", HttpStatus.FORBIDDEN),
-    INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.FORBIDDEN);
+    INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.FORBIDDEN),
+    GOOGLE_ID_TOKEN_REQUIRED(1009, "Google ID token is required", HttpStatus.BAD_REQUEST);
 
     private int code;
     private String message;

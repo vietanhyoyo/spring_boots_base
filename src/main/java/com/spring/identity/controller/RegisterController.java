@@ -35,7 +35,7 @@ public class RegisterController {
     }
 
     @PostMapping("/google")
-    ApiResponse<UserResponse> registerWithGoogle(@RequestBody GoogleRegisterRequest request) {
+    ApiResponse<UserResponse> registerWithGoogle(@RequestBody @Valid GoogleRegisterRequest request) {
         log.info("Controller: register User with Google");
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createGoogleUser(request))
